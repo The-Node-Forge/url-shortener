@@ -6,24 +6,22 @@ sidebar_position: 1
 
 # Documentation Index
 
-Welcome to the documentation for **NPM-Template**. Below is a list of available
-guides:
+Welcome to the documentation for **URL-Shortener**. Below is a list of available
+guides to help you understand, install, and use the package effectively.
 
 ## Description
 
-**A fully-configured TypeScript NPM package template with built-in CI/CD, automated
-tests, ESLint, Prettier, and Docusaurus documentation. Get started quickly with best
-practices for package development**
+**URL-Shortener** is a fully-configured TypeScript NPM package for creating and
+managing shortened URLs. It includes built-in CI/CD, automated tests, linting with
+ESLint, formatting with Prettier, and Docusaurus-powered documentation. Perfect for
+quickly getting started with backend-focused utilities.
 
 ### 📌 Getting Started
 
 - [Installation Guide](./INSTALLATION.md)
 - [Usage Instructions](./USAGE.md)
-<!-- - [Configuration](..guides/CONFIGURATION.md) -->
 
 ### 🔧 Developer Guide
-
-<!-- - [Contributing](./CONTRIBUTING.md) -->
 
 - [API Reference](./API_REFERENCE.md)
 - [Changelog](./CHANGELOG.md)
@@ -35,4 +33,4 @@ practices for package development**
 ---
 
 Need help? Check out our
-[Discussions](https://github.com/The-Node-Forge/{{REPO_NAME}}/discussions).
+[Discussions](https://github.com/The-Node-Forge/url-shortener/discussions).

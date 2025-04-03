@@ -7,15 +7,31 @@ sidebar_position: 3
 ### Basic Example
 
 ```js
-const pkg = require('package-name');
-pkg.doSomething();
+const { shortenUrl } = require('@the-node-forge/url-shortener');
+
+(async () => {
+  const shortUrl = await shortenUrl('https://example.com/some/long/url');
+  console.log(shortUrl); // Output: https://sho.rt/abc123
+})();
 ```
 
 ### Configuration
 
+You can pass an optional `options` object to configure aliasing or expiration:
+
+```js
+const shortUrl = await shortenUrl('https://example.com', {
+  alias: 'custom-alias',
+  expiresIn: '7d',
+});
+```
+
+Example config:
+
 ```json
 {
-  "option": "value"
+  "alias": "custom-alias",
+  "expiresIn": "7d"
 }
 ```
 

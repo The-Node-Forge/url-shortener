@@ -6,13 +6,21 @@ sidebar_position: 2
 
 ### Prerequisites
 
-- Node.js version X.X.X
-- npm or yarn
+- `Node.js --version 18+`
+- `npm` or `yarn`
 
-### Installation Steps
+Install the package using **npm** or **yarn**:
 
 ```sh
-npm install package-name
+npm install @the-node-forge/url-shortener
 ```
+
+or
+
+```sh
+yarn add @the-node-forge/url-shortener
+```
+
+---
 
 For more details, see [USAGE.md](USAGE.md).
