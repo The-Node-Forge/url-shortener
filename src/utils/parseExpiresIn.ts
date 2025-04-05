@@ -1,41 +1,64 @@
 /* eslint-disable space-before-function-paren */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-magic-numbers */
-/* utils/parseExpiresIn.ts */
 /**
- * Parses a time string (e.g. "1h", "30m", "1h30m") into milliseconds.
- * Throws an error if the format is invalid.
+ * Parses a time string (e.g. "1h", "30m", "1h30m", "2h15m10s", "100ms")
+ * into milliseconds. Throws an error if the format is invalid.
+ *
+ * Supported units:
+ * - h: hours
+ * - m: minutes
+ * - s: seconds
+ * - ms: milliseconds
+ *
+ * @param value A string or number representing a duration.
+ * @returns The duration in milliseconds.
  */
-export function parseExpiresIn(input: string): number {
-  const timePattern = /([0-9]+)([smhd])/g;
-  const units: Record<string, number> = {
-    s: 1000,
-    m: 60000,
-    h: 3600000,
-    d: 86400000,
-  };
+export function parseExpiresIn(value: string | number): number {
+  // If value is already a number, return it directly.
+  if (typeof value === 'number') return value;
 
-  let total = 0;
-  let match: RegExpExecArray | null;
+  // Constants for conversion factors.
+  const MULTIPLIER = 60;
+  const MS_PER_SECOND = 1000;
+  const MS_PER_MINUTE = MULTIPLIER * MS_PER_SECOND;
+  const MS_PER_HOUR = MULTIPLIER * MS_PER_MINUTE;
 
-  try {
-    while ((match = timePattern.exec(input)) !== null) {
-      const value = parseInt(match[1], 10);
-      const unit = match[2];
-      total += value * units[unit];
+  if (typeof value === 'string') {
+    // Regular expression to capture numbers (including decimals)
+    // followed by valid time units.
+    const regex = /(\d+(?:\.\d+)?)(ms|s|m|h)/g;
+    let totalMilliseconds = 0;
+    let match: RegExpExecArray | null;
+
+    // Iterate over all matches and convert each to milliseconds.
+    while ((match = regex.exec(value)) !== null) {
+      const [, amountStr, unit] = match; // Destructure the match array
+      const amount = parseFloat(amountStr);
+
+      switch (unit) {
+        case 'ms':
+          totalMilliseconds += amount;
+          break;
+        case 's':
+          totalMilliseconds += amount * MS_PER_SECOND;
+          break;
+        case 'm':
+          totalMilliseconds += amount * MS_PER_MINUTE;
+          break;
+        case 'h':
+          totalMilliseconds += amount * MS_PER_HOUR;
+          break;
+        default:
+          // Although the regex prevents invalid units, this is a safeguard.
+          throw new Error('Invalid expiresIn format');
+      }
     }
-  } catch (error) {
-    console.error('Error parsing expiresIn string:', error);
-    throw new Error(
-      'Invalid expiresIn format. Use "1h", "30m", or combinations like "1h30m".',
-    );
+
+    // If at least one valid duration segment was found, return the total.
+    if (totalMilliseconds > 0) {
+      return totalMilliseconds;
+    }
   }
 
-  if (total === 0) {
-    throw new Error(
-      'Invalid expiresIn format. Use "1h", "30m", or combinations like "1h30m".',
-    );
-  }
-
-  return total;
+  // If no valid segments were found or the format is unsupported, throw an error.
+  throw new Error('Invalid expiresIn format');
 }
