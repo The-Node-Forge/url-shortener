@@ -1,15 +1,14 @@
-[**@the-node-forge/my-npm-package**](../README.md)
+[**@the-node-forge/url-shortener**](../README.md)
 
----
+***
 
-[@the-node-forge/my-npm-package](../globals.md) / greet
+[@the-node-forge/url-shortener](../globals.md) / greet
 
 # Function: greet()
 
 > **greet**(`name`): `string`
 
-Defined in:
-[index.ts:7](https://github.com/The-Node-Forge/npm-template/blob/7ef16a4e75648007e2db8a20664c1fe88e3fe7b0/src/index.ts#L7)
+Defined in: [index.ts:7](https://github.com/The-Node-Forge/url-shortener/blob/3f83c4ac54f61e2430a2279dde20372241d59437/src/index.ts#L7)
 
 Generates a greeting message for a given name.
 

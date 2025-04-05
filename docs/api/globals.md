@@ -1,8 +1,8 @@
-[**@the-node-forge/my-npm-package**](README.md)
+[**@the-node-forge/url-shortener**](README.md)
 
----
+***
 
-# @the-node-forge/my-npm-package
+# @the-node-forge/url-shortener
 
 ## Functions
 
