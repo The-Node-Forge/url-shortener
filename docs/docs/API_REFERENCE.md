@@ -4,91 +4,75 @@ description: API parameters, returns, examples.
 sidebar_position: 4
 ---
 
-## 9. url-shortener (Self-Hosted or API-based)
+### `URLShortener({ baseDomain?, store? })`
 
-**Description:** A TypeScript/JavaScript-based npm package that provides core
-utilities to shorten URLs. It can be used in Node.js backend environments or
-full-stack apps via custom APIs.
-
-**Why It's Useful:** Simplifies link sharing, improves readability, and offers full
-control over branded short URLs and link analytics.
-
-**Features:**
-
-- Generate short links
-- Support for custom aliases
-- Analytics-ready structure
-- Frontend compatibility via backend API
-
-**Complexity:** Moderate
-
-**Technologies:** JavaScript/TypeScript, Express.js
-
-**Code Example (JavaScript - backend integration)**
-
-```js
-const { shortenUrl } = require('url-shortener');
-
-(async () => {
-  const result = await shortenUrl('https://example.com/very/long/url', {
-    alias: 'launch',
-  });
-  console.log(result); // Output: https://sho.rt/launch
-})();
-```
-
----
-
-### `shortenUrl(longUrl, options?)`
-
-Generates a shortened version of a given long URL.
+Creates a new instance of the URL shortener.
 
 **Parameters:**
 
-- `longUrl` - `string` - The full URL to be shortened.
-- `options` - `object` _(optional)_ - Optional settings:
-  - `alias` - `string` - Custom short code (e.g., `my-link`).
-  - `expiresIn` - `string` - Time-to-live (e.g., `"1d"`, `"7d"`).
+| Parameter    | Type           | Default          | Description                                                    |
+| ------------ | -------------- | ---------------- | -------------------------------------------------------------- |
+| `baseDomain` | `string`       | "https://sho.rt" | The domain used in the returned short URLs.                    |
+| `store`      | `StoreAdapter` | `InMemoryStore`  | Optional custom storage backend (e.g., Redis, File, InMemory). |
 
 **Returns:**
 
-- `Promise<string>` - The generated shortened URL.
-
-**Usage in Express.js or Backend App:**
-
-```js
-const express = require('express');
-const { shortenUrl } = require('url-shortener');
-
-const app = express();
-app.use(express.json());
-
-app.post('/shorten', async (req, res) => {
-  try {
-    const result = await shortenUrl(req.body.url, req.body.options);
-    res.json({ shortUrl: result });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-```
-
-**Optional Frontend Usage via API:**
-
-```js
-async function getShortUrl(url) {
-  const res = await fetch('/shorten', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url }),
-  });
-  const { shortUrl } = await res.json();
-  return shortUrl;
-}
-```
+An instance of the URLShortener class.
 
 ---
 
-> **Note:** This package is designed for backend use. For frontend use, make API
-> calls to your backend rather than importing the package directly to protect logic
-> and secrets.
+### `shorten(longUrl, options?)`
+
+Generates a shortened version of a long URL.
+
+**Parameters:**
+
+| Parameter   | Type     | Required | Description                                |
+| ----------- | -------- | -------- | ------------------------------------------ |
+| `longUrl`   | `string` | ✅       | The original URL to shorten.               |
+| `options`   | `object` | ❌       | Optional configuration object.             |
+| `alias`     | `string` | ❌       | Custom slug (e.g., `launch`).              |
+| `expiresIn` | `string` | ❌       | Time to live like `"1h"`, `"30m"`, `"7d"`. |
+
+**Returns:**
+
+- `Promise<string>` – A formatted short URL like `https://sho.rt/launch`
+
+---
+
+### `resolve(alias)`
+
+Resolves a short alias to the original long URL.
+
+**Parameters:**
+
+| Parameter | Type     | Required | Description                 |
+| --------- | -------- | -------- | --------------------------- |
+| `alias`   | `string` | ✅       | The short alias to resolve. |
+
+**Returns:**
+
+- `Promise<string | null>` – The original URL or `null` if expired/not found
+
+---
+
+### 🌍 Environment Support
+
+The `URLShortener` class is designed to run in **any modern JavaScript runtime**,
+including:
+
+- ✅ Node.js
+- ✅ Deno
+- ✅ Bun
+- ✅ Browsers (if bundled properly)
+
+**Store Compatibility:**
+
+| Store           | Environment Support | Notes                                     |
+| --------------- | ------------------- | ----------------------------------------- |
+| `InMemoryStore` | ✅ Universal        | Safe for Node, browser, and edge runtimes |
+| `FileStore`     | ❌ Node.js only     | Uses Node’s `fs` module                   |
+| `RedisStore`    | ❌ Node.js only     | Requires the `redis` npm package          |
+
+> For frontend/browser use, always wrap the shortener in a backend API route. Avoid
+> exposing business logic or secrets client-side.

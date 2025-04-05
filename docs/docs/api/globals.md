@@ -1,5 +1,5 @@
 # @the-node-forge/url-shortener v1.0.0
 
-## Functions
+## Classes
 
-- [greet](functions/greet.md)
+- [URLShortener](classes/URLShortener.md)

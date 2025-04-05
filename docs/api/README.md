@@ -1,6 +1,6 @@
 **@the-node-forge/url-shortener**
 
----
+***
 
 <div align="center">
 
@@ -18,114 +18,176 @@
 
 </div>
 
-A **simple and flexible URL shortener** package for JavaScript/TypeScript
-applications. This package helps developers **create branded or custom short URLs**
-for their projects.
+A **modular, flexible, and fully-documented URL shortener** written in TypeScript.
+Supports custom aliases, expiration, multiple storage backends, and works across
+Node.js, browser, and serverless environments.
+
+---
 
 ## ✨ Features
 
-- ✅ **Custom Aliases** – Shorten with a readable slug.
-- ✅ **Expiration Support** – Set TTL for each link.
-- ✅ **Self-hostable** – Use with your own Express backend.
-- ✅ **Frontend-Friendly** – Call via API from client apps.
+- ✅ **Custom Aliases** – Define readable slugs like `sho.rt/launch`
+- ✅ **Expiration Support** – Auto-expire short links after a set TTL
+- ✅ **Pluggable Storage** – In-memory, file, or Redis
+- ✅ **Works Anywhere** – Node.js, Bun, Deno, browser (via bundling)
+- 🔀 **Collision Handling** – Auto-generate or error on alias conflicts
+- 📚 **Full Documentation** – Clean, clear Docusaurus docs + typed API
 
 ---
 
 ## 📦 Installation
 
-```sh
+```bash
 npm install @the-node-forge/url-shortener
 ```
 
-or using Yarn:
+or
 
-```sh
+```bash
 yarn add @the-node-forge/url-shortener
 ```
+
+### Redis Support (Optional)
+
+```bash
+npm install redis
+```
+
+> Redis is only required if using the `RedisStore`. It is listed as an
+> `optionalDependency`.
 
 ---
 
 ## 🛠️ Basic Usage
 
-### **1️⃣ 🌐 JavaScript/TypeScript Example**
+```ts
+import { URLShortener } from '@the-node-forge/url-shortener';
 
-```javascript
-import { shortenUrl } from '@the-node-forge/url-shortener';
+const shortener = new URLShortener();
 
-(async () => {
-  const shortUrl = await shortenUrl('https://example.com/some/long/path', {
-    alias: 'launch',
-    expiresIn: '7d',
-  });
-  console.log(shortUrl); // Output: https://sho.rt/launch
-})();
+const shortUrl = await shortener.shorten('https://example.com/very/long/url', {
+  alias: 'launch',
+  expiresIn: '7d',
+});
+
+console.log(shortUrl); // https://sho.rt/launch
+```
+
+### Resolve a Link
+
+```ts
+const result = await shortener.resolve('launch');
+console.log(result); // https://example.com/very/long/url
 ```
 
 ---
 
-### 2️⃣ 🌐 Express Integration Example
+## 🧪 Advanced Setup: Redis Support
 
-```typescript
+```ts
+import { createClient } from 'redis';
+import { RedisStore } from '@the-node-forge/url-shortener/stores/redisStore';
+import { URLShortener } from '@the-node-forge/url-shortener';
+
+const client = createClient();
+await client.connect();
+
+const store = new RedisStore(client);
+const shortener = new URLShortener('https://sho.rt', store);
+```
+
+---
+
+## 📘 API Reference
+
+### `new URLShortener({ baseDomain?, store? })`
+
+| Parameter    | Type           | Default          | Description                                 |
+| ------------ | -------------- | ---------------- | ------------------------------------------- |
+| `baseDomain` | `string`       | "https://sho.rt" | Base domain for generated short URLs        |
+| `store`      | `StoreAdapter` | `InMemoryStore`  | Storage backend (in-memory, file, or Redis) |
+
+Returns a new instance of the shortener.
+
+### `shorten(longUrl, options?)`
+
+| Parameter   | Type     | Required | Description                   |
+| ----------- | -------- | -------- | ----------------------------- |
+| `longUrl`   | `string` | ✅       | The URL to shorten            |
+| `alias`     | `string` | ❌       | Optional custom short code    |
+| `expiresIn` | `string` | ❌       | Time-to-live like "1d", "30m" |
+
+Returns: `Promise<string>`
+
+### `resolve(alias)`
+
+| Parameter | Type     | Required | Description                     |
+| --------- | -------- | -------- | ------------------------------- |
+| `alias`   | `string` | ✅       | The alias code (e.g., `launch`) |
+
+Returns: `Promise<string | null>` – The original URL or `null` if expired/not found.
+
+---
+
+## 🌍 Environment Compatibility
+
+This package works in all modern JS runtimes:
+
+- ✅ Node.js
+- ✅ Deno
+- ✅ Bun
+- ✅ Browser (via bundler like Vite/Webpack)
+
+| Store         | Environment  | Notes                              |
+| ------------- | ------------ | ---------------------------------- |
+| InMemoryStore | ✅ Universal | Fully runtime-safe                 |
+| FileStore     | ❌ Node-only | Uses `fs` module                   |
+| RedisStore    | ❌ Node-only | Requires Redis and `redis` package |
+
+> In browser apps, create an API layer — avoid importing directly on the frontend.
+
+---
+
+## 🧪 Testing / Express API Example
+
+```ts
 import express from 'express';
-import { shortenUrl } from '@the-node-forge/url-shortener';
+import { URLShortener } from '@the-node-forge/url-shortener';
 
 const app = express();
+const shortener = new URLShortener();
+
 app.use(express.json());
 
 app.post('/shorten', async (req, res) => {
-  const { url, options } = req.body;
   try {
-    const shortUrl = await shortenUrl(url, options);
+    const shortUrl = await shortener.shorten(req.body.url, req.body.options);
     res.json({ shortUrl });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
-
-app.listen(3000, () => console.log('URL shortener running on port 3000'));
 ```
 
 ---
 
-## ✅ **API Reference**
+## 💡 Contributing
 
-### **shortenUrl Function**
-
-```typescript
-shortenUrl(longUrl: string, options?: {
-  alias?: string;
-  expiresIn?: string;
-}): Promise<string>
-```
-
-| Parameter   | Type     | Description                                 |
-| ----------- | -------- | ------------------------------------------- |
-| `longUrl`   | `string` | The original URL to be shortened            |
-| `alias`     | `string` | Optional custom slug for the shortened URL  |
-| `expiresIn` | `string` | Optional TTL for the short link (e.g. "7d") |
-
-#### **Returns**
-
-- `Promise<string>` – The generated shortened URL.
-
----
-
-### 💡 **Contributing**
-
-Contributions are welcome! Please submit
-[issues](https://github.com/The-Node-Forge/url-shortener/issues) or
+We welcome all contributions — big or small! Feel free to open
+[issues](https://github.com/The-Node-Forge/url-shortener/issues) or submit
 [pull requests](https://github.com/The-Node-Forge/url-shortener/pulls).
 
 ---
 
-### ⭐ Support
+## ⭐ Support
 
-If you find this package useful, please **give it a ⭐ on**
-[GitHub](https://github.com/The-Node-Forge/url-shortener)
+If you find this useful, consider starring us on
+[GitHub](https://github.com/The-Node-Forge/url-shortener) ⭐
 
 ---
 
-### 🔗 **Links**
+## 🔗 Links
 
 - 📦 [NPM Package](https://www.npmjs.com/package/@the-node-forge/url-shortener)
-- 🏗 [The-Node-Forge](https://github.com/The-Node-Forge)
+- 🧾 [Live Docs](https://the-node-forge.github.io/url-shortener/)
+- 🏗 [The Node Forge](https://github.com/The-Node-Forge)

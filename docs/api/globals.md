@@ -1,9 +1,15 @@
 [**@the-node-forge/url-shortener**](README.md)
 
----
+***
 
 # @the-node-forge/url-shortener
 
-## Functions
+## References
 
-- [greet](functions/greet.md)
+### default
+
+Renames and re-exports [URLShortener](classes/URLShortener.md)
+
+## Classes
+
+- [URLShortener](classes/URLShortener.md)

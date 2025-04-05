@@ -14,10 +14,9 @@
 
 </div>
 
-A **lightweight, flexible URL shortener** library written in TypeScript. This
-in-memory solution is perfect for testing, local development, and educational
-projects. Easily customize aliases, add expirations, and embed into Node.js or
-browser environments.
+A **modular, flexible, and fully-documented URL shortener** written in TypeScript.
+Supports custom aliases, expiration, multiple storage backends, and works across
+Node.js, browser, and serverless environments.
 
 ---
 
@@ -25,15 +24,14 @@ browser environments.
 
 - ✅ **Custom Aliases** – Define readable slugs like `sho.rt/launch`
 - ✅ **Expiration Support** – Auto-expire short links after a set TTL
-- ✅ **Simple In-Memory Store** – No database required
-- ✅ **Embeddable Anywhere** – Use in server or browser context
-- 🧩 **Swappable Storage Adapter** – Use memory, file, or Redis with the same
-  interface
-- 🔀 **Collision Handling Options** – Avoid alias errors or auto-generate
+- ✅ **Pluggable Storage** – In-memory, file, or Redis
+- ✅ **Works Anywhere** – Node.js, Bun, Deno, browser (via bundling)
+- 🔀 **Collision Handling** – Auto-generate or error on alias conflicts
+- 📚 **Full Documentation** – Clean, clear Docusaurus docs + typed API
 
 ---
 
-## 📆 Installation
+## 📦 Installation
 
 ```bash
 npm install @the-node-forge/url-shortener
@@ -47,51 +45,40 @@ yarn add @the-node-forge/url-shortener
 
 ### Redis Support (Optional)
 
-If you plan to use Redis for persistence:
-
 ```bash
 npm install redis
 ```
 
-Redis is listed as an `optionalDependency` so it's not required unless you use
-`RedisStore`.
+> Redis is only required if using the `RedisStore`. It is listed as an
+> `optionalDependency`.
 
 ---
 
-## 🛠️ Usage
-
-### 🌟 Instantiate & Shorten URLs
+## 🛠️ Basic Usage
 
 ```ts
 import { URLShortener } from '@the-node-forge/url-shortener';
 
-const shortener = new URLShortener(); // defaults to base domain "https://sho.rt"
+const shortener = new URLShortener();
 
-const shortUrl = await shortener.shorten('https://example.com/some/long/path', {
+const shortUrl = await shortener.shorten('https://example.com/very/long/url', {
   alias: 'launch',
   expiresIn: '7d',
 });
 
-console.log(shortUrl); // Output: https://sho.rt/launch
+console.log(shortUrl); // https://sho.rt/launch
 ```
 
----
-
-### 🔀 Resolve Short URLs
+### Resolve a Link
 
 ```ts
-const originalUrl = await shortener.resolve('launch');
-
-if (originalUrl) {
-  console.log('Original URL:', originalUrl);
-} else {
-  console.log('Link expired or not found.');
-}
+const result = await shortener.resolve('launch');
+console.log(result); // https://example.com/very/long/url
 ```
 
 ---
 
-## 🧪 Advanced: Custom Store (e.g. Redis)
+## 🧪 Advanced Setup: Redis Support
 
 ```ts
 import { createClient } from 'redis';
@@ -101,55 +88,82 @@ import { URLShortener } from '@the-node-forge/url-shortener';
 const client = createClient();
 await client.connect();
 
-const redisStore = new RedisStore(client);
-const shortener = new URLShortener('https://sho.rt', redisStore);
-
-const shortUrl = await shortener.shorten('https://nodeforge.dev', {
-  expiresIn: '2h',
-});
-console.log(shortUrl);
+const store = new RedisStore(client);
+const shortener = new URLShortener('https://sho.rt', store);
 ```
 
 ---
 
-## 🔮 API
+## 📘 API Reference
 
-### `new URLShortener(baseDomain?: string, store?: StoreAdapter)`
+### `new URLShortener({ baseDomain?, store? })`
 
-Creates a new instance of the shortener. Optional `baseDomain` sets the prefix used
-in returned short URLs. You can also pass a custom store (in-memory, file, or Redis).
+| Parameter    | Type           | Default          | Description                                 |
+| ------------ | -------------- | ---------------- | ------------------------------------------- |
+| `baseDomain` | `string`       | "https://sho.rt" | Base domain for generated short URLs        |
+| `store`      | `StoreAdapter` | `InMemoryStore`  | Storage backend (in-memory, file, or Redis) |
+
+Returns a new instance of the shortener.
+
+### `shorten(longUrl, options?)`
+
+| Parameter   | Type     | Required | Description                   |
+| ----------- | -------- | -------- | ----------------------------- |
+| `longUrl`   | `string` | ✅       | The URL to shorten            |
+| `alias`     | `string` | ❌       | Optional custom short code    |
+| `expiresIn` | `string` | ❌       | Time-to-live like "1d", "30m" |
+
+Returns: `Promise<string>`
+
+### `resolve(alias)`
+
+| Parameter | Type     | Required | Description                     |
+| --------- | -------- | -------- | ------------------------------- |
+| `alias`   | `string` | ✅       | The alias code (e.g., `launch`) |
+
+Returns: `Promise<string | null>` – The original URL or `null` if expired/not found.
 
 ---
 
-### `shorten(longUrl: string, options?: { alias?: string, expiresIn?: string }): Promise<string>`
+## 🌍 Environment Compatibility
 
-| Option      | Type     | Description                     |
-| ----------- | -------- | ------------------------------- |
-| `longUrl`   | `string` | The original URL to shorten     |
-| `alias`     | `string` | Optional custom code/slug       |
-| `expiresIn` | `string` | Optional TTL (e.g., "1d", "2h") |
+This package works in all modern JS runtimes:
 
-Returns a **Promise<string>** (e.g. `https://sho.rt/launch`).
+- ✅ Node.js
+- ✅ Deno
+- ✅ Bun
+- ✅ Browser (via bundler like Vite/Webpack)
+
+| Store         | Environment  | Notes                              |
+| ------------- | ------------ | ---------------------------------- |
+| InMemoryStore | ✅ Universal | Fully runtime-safe                 |
+| FileStore     | ❌ Node-only | Uses `fs` module                   |
+| RedisStore    | ❌ Node-only | Requires Redis and `redis` package |
+
+> In browser apps, create an API layer — avoid importing directly on the frontend.
 
 ---
 
-### `resolve(alias: string): Promise<string | null>`
+## 🧪 Testing / Express API Example
 
-Resolves a short alias back to the original URL, or returns `null` if expired or not
-found.
+```ts
+import express from 'express';
+import { URLShortener } from '@the-node-forge/url-shortener';
 
----
+const app = express();
+const shortener = new URLShortener();
 
-## ❌ Limitations
+app.use(express.json());
 
-- URLs are stored in-memory by default — restarting the server resets all data.  
-  👉 **Fix**: Use a `FileStore` or `RedisStore` for persistence.
-
-- Redis support is **optional** — you must install it manually with
-  `npm install redis`.
-
-- Alias collisions will throw unless you auto-generate.  
-  👉 **Fix**: Omit the alias to have one generated automatically.
+app.post('/shorten', async (req, res) => {
+  try {
+    const shortUrl = await shortener.shorten(req.body.url, req.body.options);
+    res.json({ shortUrl });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+```
 
 ---
 
@@ -163,12 +177,13 @@ We welcome all contributions — big or small! Feel free to open
 
 ## ⭐ Support
 
-If you find this useful, consider starring us on  
+If you find this useful, consider starring us on
 [GitHub](https://github.com/The-Node-Forge/url-shortener) ⭐
 
 ---
 
 ## 🔗 Links
 
-- 📆 [NPM Package](https://www.npmjs.com/package/@the-node-forge/url-shortener)
+- 📦 [NPM Package](https://www.npmjs.com/package/@the-node-forge/url-shortener)
+- 🧾 [Live Docs](https://the-node-forge.github.io/url-shortener/)
 - 🏗 [The Node Forge](https://github.com/The-Node-Forge)
