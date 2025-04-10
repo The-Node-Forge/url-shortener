@@ -43,7 +43,16 @@ export class FileStore implements StoreAdapter {
     return this.store[alias] ?? null;
   }
 
-  async set(alias: string, entry: StoreEntry): Promise<void> {
+  async set(
+    alias: string,
+    entry: StoreEntry,
+    override: boolean = false,
+  ): Promise<void> {
+    if ((await this.has(alias)) && !override) {
+      throw new Error(
+        `Alias "${alias}" already exists. Use override option to replace it.`,
+      );
+    }
     this.store[alias] = entry;
     this.save();
   }

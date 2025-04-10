@@ -25,12 +25,22 @@ export class RedisStore implements StoreAdapter {
     }
   }
 
-  async set(alias: string, entry: StoreEntry): Promise<void> {
+  async set(
+    alias: string,
+    entry: StoreEntry,
+    override: boolean = false,
+  ): Promise<void> {
     try {
+      const exists = await this.has(alias);
+      if (exists && !override) {
+        throw new Error(
+          `Alias "${alias}" already exists. Use override option to replace it.`,
+        );
+      }
       await this.client.set(alias, JSON.stringify(entry));
     } catch (error) {
       console.error(`Error setting alias ${alias} in Redis:`, error);
-      // Optionally, rethrow or handle this error as needed.
+      throw error; // Propagate error if needed
     }
   }
 
