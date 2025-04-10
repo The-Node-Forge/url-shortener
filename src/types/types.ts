@@ -21,7 +21,7 @@ export type StoreEntry = {
  */
 export interface StoreAdapter {
   get(alias: string): Promise<StoreEntry | null>;
-  set(alias: string, entry: StoreEntry): Promise<void>;
+  set(alias: string, entry: StoreEntry, override?: boolean): Promise<void>;
   delete(alias: string): Promise<void>;
   has(alias: string): Promise<boolean>;
   list(): Promise<Record<string, StoreEntry>>;

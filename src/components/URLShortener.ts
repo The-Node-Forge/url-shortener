@@ -40,20 +40,24 @@ export class URLShortener {
     let alias =
       options?.alias ?? this.generateCode(URLShortener.DEFAULT_CODE_LENGTH);
 
-    // Check if alias already exists; if provided explicitly, throw an error.
+    // Check if alias already exists.
     if (await this.store.has(alias)) {
-      if (options?.alias) {
+      // If the alias is explicitly provided and override is not enabled, throw an error.
+      if (options?.alias && !options?.override) {
         throw new Error('Alias is already in use.');
       }
-      // Auto-generate a unique alias if needed.
-      do {
-        alias = this.generateCode(URLShortener.DEFAULT_CODE_LENGTH);
-      } while (await this.store.has(alias));
+      // Otherwise, if no alias was provided, auto-generate a unique alias.
+      // (You may choose to also honor the override flag here as well.)
+      if (!options?.alias) {
+        do {
+          alias = this.generateCode(URLShortener.DEFAULT_CODE_LENGTH);
+        } while (await this.store.has(alias));
+      }
     }
 
     let expiresAt: number | undefined = undefined;
     try {
-      // Parse expiresIn string if provided
+      // Parse expiresIn string if provided.
       expiresAt = options?.expiresIn
         ? Date.now() + parseExpiresIn(options.expiresIn)
         : undefined;
@@ -63,14 +67,18 @@ export class URLShortener {
     }
 
     try {
-      // Save the mapping in the store
-      await this.store.set(alias, { url: longUrl, expiresAt });
+      // IMPORTANT: Pass the override flag (defaulting to false if not provided)
+      await this.store.set(
+        alias,
+        { url: longUrl, expiresAt },
+        options?.override ?? false,
+      );
     } catch (error) {
       console.error('Error saving shortened URL:', error);
       throw new Error('Could not save shortened URL.');
     }
 
-    // Return the complete shortened URL
+    // Return the complete shortened URL.
     return `${this.baseDomain}/${alias}`;
   }
 
