@@ -37,10 +37,20 @@ export class RedisStore implements StoreAdapter {
           `Alias "${alias}" already exists. Use override option to replace it.`,
         );
       }
-      await this.client.set(alias, JSON.stringify(entry));
+
+      const TTL_DIVIDER = 1000;
+
+      const ttl = entry.expiresAt
+        ? Math.ceil((entry.expiresAt - Date.now()) / TTL_DIVIDER)
+        : undefined;
+      if (ttl && ttl > 0) {
+        await this.client.set(alias, JSON.stringify(entry), { EX: ttl });
+      } else {
+        await this.client.set(alias, JSON.stringify(entry));
+      }
     } catch (error) {
       console.error(`Error setting alias ${alias} in Redis:`, error);
-      throw error; // Propagate error if needed
+      throw error;
     }
   }
 
