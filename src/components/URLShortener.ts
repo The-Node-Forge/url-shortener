@@ -2,8 +2,8 @@
 /* eslint-disable space-before-function-paren */
 // urlShortener.ts
 import { ShortenOptions, StoreAdapter } from '../types/types';
-import { parseExpiresIn } from '../utils/parseExpiresIn';
-import { InMemoryStore } from '../stores/inMemoryStore';
+import { parseExpiresIn } from '../utils/parseExpiresIn.js';
+import { InMemoryStore } from '../stores/inMemoryStore.js';
 
 /**
  * URLShortener provides methods to shorten URLs and resolve aliases.

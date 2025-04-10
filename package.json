@@ -2,8 +2,27 @@
   "name": "@the-node-forge/url-shortener",
   "version": "1.0.0",
   "description": "A URL shortener that converts lengthy URLs into compact, unique links that redirect users to the original destination.",
-  "main": "src/index.ts",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./components/URLShortener.js": {
+      "import": "./dist/esm/components/URLShortener.js",
+      "require": "./dist/cjs/components/URLShortener.js"
+    },
+    "./stores/redisStore.js": {
+      "import": "./dist/esm/stores/redisStore.js",
+      "require": "./dist/cjs/stores/redisStore.js"
+    },
+    "./stores/fileStore.js": {
+      "import": "./dist/esm/stores/fileStore.js",
+      "require": "./dist/cjs/stores/fileStore.js"
+    }
+  },
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
@@ -13,7 +32,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "npm run build",
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
     "docs:generate": "typedoc --plugin typedoc-plugin-markdown --out docs/api src/index.ts",
     "docs:build": "npm run docs:generate && cd docs && npm run build",
     "docs:start": "npm run docs:generate && cd docs && npm start",
