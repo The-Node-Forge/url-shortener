@@ -17,15 +17,19 @@ export function parseExpiresIn(value: string | number): number {
   if (typeof value === 'number') return value;
 
   // Constants for conversion factors.
-  const MULTIPLIER = 60;
+  const SECONDS_IN_MINUTE = 60;
+  const MINUTES_IN_HOUR = 60;
+  const HOURS_IN_DAY = 24;
+
   const MS_PER_SECOND = 1000;
-  const MS_PER_MINUTE = MULTIPLIER * MS_PER_SECOND;
-  const MS_PER_HOUR = MULTIPLIER * MS_PER_MINUTE;
+  const MS_PER_MINUTE = SECONDS_IN_MINUTE * MS_PER_SECOND;
+  const MS_PER_HOUR = MINUTES_IN_HOUR * MS_PER_MINUTE;
+  const MS_PER_DAY = HOURS_IN_DAY * MS_PER_HOUR;
 
   if (typeof value === 'string') {
     // Regular expression to capture numbers (including decimals)
     // followed by valid time units.
-    const regex = /(\d+(?:\.\d+)?)(ms|s|m|h)/g;
+    const regex = /(\d+(?:\.\d+)?)(ms|s|m|h|d)/g;
     let totalMilliseconds = 0;
     let match: RegExpExecArray | null;
 
@@ -47,8 +51,10 @@ export function parseExpiresIn(value: string | number): number {
         case 'h':
           totalMilliseconds += amount * MS_PER_HOUR;
           break;
+        case 'd':
+          totalMilliseconds += amount * MS_PER_DAY;
+          break;
         default:
-          // Although the regex prevents invalid units, this is a safeguard.
           throw new Error('Invalid expiresIn format');
       }
     }
