@@ -4,20 +4,20 @@ description: API parameters, returns, examples.
 sidebar_position: 4
 ---
 
-### `URLShortener({ baseDomain?, store? })`
+### `new URLShortener(baseDomain, store)`
 
 Creates a new instance of the URL shortener.
 
 **Parameters:**
 
-| Parameter    | Type           | Default          | Description                                                    |
-| ------------ | -------------- | ---------------- | -------------------------------------------------------------- |
-| `baseDomain` | `string`       | "https://sho.rt" | The domain used in the returned short URLs.                    |
-| `store`      | `StoreAdapter` | `InMemoryStore`  | Optional custom storage backend (e.g., Redis, File, InMemory). |
+| Parameter    | Type           | Required | Default          | Description                          |
+| ------------ | -------------- | -------- | ---------------- | ------------------------------------ |
+| `baseDomain` | `string`       | ❌       | "https://sho.rt" | Domain used for generated short URLs |
+| `store`      | `StoreAdapter` | ✅       | _none_           | Redis-backed store (via RedisStore)  |
 
 **Returns:**
 
-An instance of the URLShortener class.
+- A configured instance of `URLShortener`
 
 ---
 
@@ -27,52 +27,78 @@ Generates a shortened version of a long URL.
 
 **Parameters:**
 
-| Parameter   | Type     | Required | Description                                |
-| ----------- | -------- | -------- | ------------------------------------------ |
-| `longUrl`   | `string` | ✅       | The original URL to shorten.               |
-| `options`   | `object` | ❌       | Optional configuration object.             |
-| `alias`     | `string` | ❌       | Custom slug (e.g., `launch`).              |
-| `expiresIn` | `string` | ❌       | Time to live like `"1h"`, `"30m"`, `"7d"`. |
+| Parameter   | Type      | Required | Description                                    |
+| ----------- | --------- | -------- | ---------------------------------------------- |
+| `longUrl`   | `string`  | ✅       | The full URL to shorten                        |
+| `options`   | `object`  | ❌       | Optional settings (alias, expiresIn, override) |
+| `alias`     | `string`  | ❌       | Optional custom slug (e.g., `launch`)          |
+| `expiresIn` | `string`  | ❌       | Expiration duration like `1h`, `30m`, `7d`     |
+| `override`  | `boolean` | ❌       | Overwrite an existing alias if one exists      |
 
 **Returns:**
 
-- `Promise<string>` – A formatted short URL like `https://sho.rt/launch`
+- `Promise<string>` – The shortened URL (e.g., `https://sho.rt/launch`)
 
 ---
 
 ### `resolve(alias)`
 
-Resolves a short alias to the original long URL.
+Resolves a short alias back to the original URL.
 
 **Parameters:**
 
-| Parameter | Type     | Required | Description                 |
-| --------- | -------- | -------- | --------------------------- |
-| `alias`   | `string` | ✅       | The short alias to resolve. |
+| Parameter | Type     | Required | Description               |
+| --------- | -------- | -------- | ------------------------- |
+| `alias`   | `string` | ✅       | The short code to resolve |
 
 **Returns:**
 
-- `Promise<string | null>` – The original URL or `null` if expired/not found
+- `Promise<string | null>` – Original URL, or `null` if not found or expired
 
 ---
 
-### 🌍 Environment Support
+### 🧱 StoreAdapter Interface
 
-The `URLShortener` class is designed to run in **any modern JavaScript runtime**,
-including:
+Any custom store implementation (such as RedisStore) must implement the following
+methods:
 
-- ✅ Node.js
-- ✅ Deno
-- ✅ Bun
-- ✅ Browsers (if bundled properly)
+```ts
+interface StoreAdapter {
+  get(alias: string): Promise<StoreEntry | null>;
+  set(alias: string, entry: StoreEntry, override?: boolean): Promise<void>;
+  delete(alias: string): Promise<void>;
+  has(alias: string): Promise<boolean>;
+  list(): Promise<Record<string, StoreEntry>>;
+  clearExpired(): Promise<void>;
+}
+```
 
-**Store Compatibility:**
+Each `StoreEntry` looks like this:
 
-| Store           | Environment Support | Notes                                     |
-| --------------- | ------------------- | ----------------------------------------- |
-| `InMemoryStore` | ✅ Universal        | Safe for Node, browser, and edge runtimes |
-| `FileStore`     | ❌ Node.js only     | Uses Node’s `fs` module                   |
-| `RedisStore`    | ❌ Node.js only     | Requires the `redis` npm package          |
+```ts
+interface StoreEntry {
+  url: string;
+  expiresAt?: number;
+}
+```
 
-> For frontend/browser use, always wrap the shortener in a backend API route. Avoid
-> exposing business logic or secrets client-side.
+---
+
+### ✅ Runtime Compatibility
+
+| Environment | Status |
+| ----------- | ------ |
+| Node.js     | ✅ Yes |
+| Deno        | ✅ Yes |
+| Bun         | ✅ Yes |
+
+> Note: This package is for backend use. You must proxy it through your own API if
+> used with a frontend app.
+
+---
+
+### 🗃 Supported Store
+
+| Store      | Runtime      | Notes                              |
+| ---------- | ------------ | ---------------------------------- |
+| RedisStore | ✅ Node-only | Requires Redis and `redis` package |

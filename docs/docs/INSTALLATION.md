@@ -6,8 +6,9 @@ sidebar_position: 2
 
 ### Prerequisites
 
-- `Node.js` version **18+** (only required if using FileStore or RedisStore)
+- `Node.js` version **18+**
 - `npm` or `yarn` installed globally
+- A running Redis server (locally or remote)
 
 ---
 
@@ -25,30 +26,30 @@ yarn add @the-node-forge/url-shortener
 
 ---
 
-### Redis Support (Optional)
+### Redis Required
 
-To use the `RedisStore`, install the Redis client:
+Install the official Redis client:
 
 ```bash
 npm install redis
 ```
 
-> Redis is not included by default and must be installed manually if needed.
+> The `redis` package is required. Make sure your Redis instance is accessible and
+> connected before calling any URL shortening methods.
 
 ---
 
 ### Runtime Compatibility
 
-The core library works in any modern JavaScript environment:
+This package runs in:
 
-- ✅ Node.js
-- ✅ Deno
-- ✅ Bun
-- ✅ Browsers (if bundled properly)
+- ✅ Node.js (18+)
+- ✅ Bun (via bundler)
+- ✅ Deno (via bundler)
 
-Default `InMemoryStore` is fully environment-safe.
+> This library is designed for backend/server-side usage only.
 
 ---
 
-For usage examples, see [USAGE.md](./USAGE.md) or the
-[API Reference](./API_REFERENCE.md).
+For examples and configuration, see [USAGE.md](./USAGE.md) and
+[API_REFERENCE.md](./API_REFERENCE.md).
