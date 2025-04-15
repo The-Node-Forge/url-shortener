@@ -1,9 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable space-before-function-paren */
-// urlShortener.ts
 import { ShortenOptions, StoreAdapter } from '../types/types';
 import { parseExpiresIn } from '../utils/parseExpiresIn.js';
-import { InMemoryStore } from '../stores/inMemoryStore.js';
 
 /**
  * URLShortener provides methods to shorten URLs and resolve aliases.
@@ -17,37 +15,44 @@ export class URLShortener {
   private static readonly CHAR_SET =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-  constructor(
-    baseDomain = 'https://sho.rt',
-    store: StoreAdapter = new InMemoryStore(),
-  ) {
+  /**
+   * Create a new URLShortener instance.
+   * @param baseDomain - Domain used for returned shortened URLs (e.g., "https://sho.rt")
+   * @param store - Redis-backed implementation of the StoreAdapter interface
+   */
+  constructor(baseDomain: string, store: StoreAdapter) {
     this.baseDomain = baseDomain;
     this.store = store;
   }
 
   /**
-   * Shortens a long URL into a short one.
-   * Validates the URL, ensures alias uniqueness, parses TTL, and stores the mapping.
-   * @returns A Promise that resolves to the shortened URL string.
+   * Shortens a long URL into a shorter one with an alias.
+   * - Generates alias if not provided
+   * - Validates the URL
+   * - Checks for collisions
+   * - Supports optional expiration time and override flag
+   *
+   * @param longUrl - The full, original URL to shorten
+   * @param options - Optional config (alias, override, expiresIn)
+   * @returns A Promise that resolves to the full shortened URL string
    */
   async shorten(longUrl: string, options?: ShortenOptions): Promise<string> {
-    // Validate URL format
+    // Validate input URL
     if (!this.isValidUrl(longUrl)) {
       throw new Error('Invalid URL format.');
     }
 
-    // Generate alias if not provided
+    // If no alias provided, generate a random one
     let alias =
       options?.alias ?? this.generateCode(URLShortener.DEFAULT_CODE_LENGTH);
 
-    // Check if alias already exists.
+    // Check if alias already exists
     if (await this.store.has(alias)) {
-      // If the alias is explicitly provided and override is not enabled, throw an error.
       if (options?.alias && !options?.override) {
         throw new Error('Alias is already in use.');
       }
-      // Otherwise, if no alias was provided, auto-generate a unique alias.
-      // (You may choose to also honor the override flag here as well.)
+
+      // If no alias was specified and there's a collision, generate a new one until unique
       if (!options?.alias) {
         do {
           alias = this.generateCode(URLShortener.DEFAULT_CODE_LENGTH);
@@ -55,9 +60,9 @@ export class URLShortener {
       }
     }
 
-    let expiresAt: number | undefined = undefined;
+    // Optional expiration timestamp
+    let expiresAt: number | undefined;
     try {
-      // Parse expiresIn string if provided.
       expiresAt = options?.expiresIn
         ? Date.now() + parseExpiresIn(options.expiresIn)
         : undefined;
@@ -66,8 +71,8 @@ export class URLShortener {
       throw error;
     }
 
+    // Store the shortened URL in Redis
     try {
-      // IMPORTANT: Pass the override flag (defaulting to false if not provided)
       await this.store.set(
         alias,
         { url: longUrl, expiresAt },
@@ -78,13 +83,17 @@ export class URLShortener {
       throw new Error('Could not save shortened URL.');
     }
 
-    // Return the complete shortened URL.
+    // Return full short URL
     return `${this.baseDomain}/${alias}`;
   }
 
   /**
-   * Resolves a short alias to its original URL.
-   * Returns null if the alias does not exist or has expired.
+   * Resolves a short alias back to its original long URL.
+   * - If alias doesn’t exist, returns null
+   * - If alias exists but expired, deletes it and returns null
+   *
+   * @param alias - The short code to resolve
+   * @returns The original long URL or null if not found/expired
    */
   async resolve(alias: string): Promise<string | null> {
     let entry;
@@ -95,11 +104,9 @@ export class URLShortener {
       return null;
     }
 
-    if (!entry) {
-      return null;
-    }
+    if (!entry) return null;
 
-    // If the URL has expired, delete it and return null.
+    // Handle expiration
     if (entry.expiresAt && Date.now() > entry.expiresAt) {
       try {
         await this.store.delete(alias);
@@ -113,7 +120,7 @@ export class URLShortener {
   }
 
   /**
-   * Validates a URL string using the URL constructor.
+   * Helper method to validate a URL string using the built-in URL constructor.
    */
   private isValidUrl(url: string): boolean {
     try {
@@ -126,6 +133,7 @@ export class URLShortener {
 
   /**
    * Generates a random alphanumeric code of the specified length.
+   * Used for alias generation.
    */
   private generateCode(length: number): string {
     let code = '';

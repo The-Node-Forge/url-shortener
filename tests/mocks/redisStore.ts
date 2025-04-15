@@ -28,14 +28,13 @@ export class MockRedisStore {
    * @param value A StoreEntry object.
    * @param ttl TTL in milliseconds.
    */
-  async set(key: string, value: StoreEntry, ttl?: number): Promise<void> {
-    if (ttl !== undefined) {
-      const expiresAt = Date.now() + ttl;
-      // Remove the setTimeout deletion and simply store the expiresAt timestamp.
-      this.store.set(key, { entry: { ...value, expiresAt } });
-    } else {
-      this.store.set(key, { entry: value });
+  async set(key: string, value: StoreEntry, override?: boolean): Promise<void> {
+    const exists = await this.has(key);
+    if (exists && !override) {
+      throw new Error('Alias is already in use.');
     }
+
+    this.store.set(key, { entry: value });
   }
 
   async get(key: string): Promise<StoreEntry | null> {
