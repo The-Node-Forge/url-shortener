@@ -25,9 +25,19 @@
     "url": "https://github.com/The-Node-Forge/url-shortener"
   },
   "keywords": [
-    "express",
+    "url-shortener",
+    "redis",
+    "express-middleware",
+    "link-shortener",
     "typescript",
-    "npm-package"
+    "npm-package",
+    "nodejs",
+    "redis-store",
+    "backend",
+    "api-tools",
+    "custom-alias",
+    "url-aliasing",
+    "expiration"
   ],
   "author": {
     "name": "Andrew Gomez",
