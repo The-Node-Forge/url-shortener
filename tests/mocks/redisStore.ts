@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable space-before-function-paren */
 
 export interface StoreEntry {

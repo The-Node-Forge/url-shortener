@@ -4,7 +4,7 @@
 // Type-only import for type-checking. This won't force a runtime dependency unless RedisStore is actually used.
 import type { RedisClientType } from 'redis';
 
-import { StoreAdapter, StoreEntry } from '../types/types';
+import { type StoreAdapter, type StoreEntry } from '../types/types';
 
 /**
  * RedisStore implements the StoreAdapter interface using Redis for persistence.

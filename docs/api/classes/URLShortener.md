@@ -1,16 +1,15 @@
 [**@the-node-forge/url-shortener**](../README.md)
 
----
+***
 
 [@the-node-forge/url-shortener](../globals.md) / URLShortener
 
 # Class: URLShortener
 
-Defined in:
-[components/URLShortener.ts:12](https://github.com/The-Node-Forge/url-shortener/blob/0505465b023da8537f4142a9cb2e5ebfc46c68fd/src/components/URLShortener.ts#L12)
+Defined in: [components/URLShortener.ts:10](https://github.com/The-Node-Forge/url-shortener/blob/325c54b22c00921a6b1c21ee92eb374754795459/src/components/URLShortener.ts#L10)
 
-URLShortener provides methods to shorten URLs and resolve aliases. All methods are
-asynchronous and include robust error handling.
+URLShortener provides methods to shorten URLs and resolve aliases.
+All methods are asynchronous and include robust error handling.
 
 ## Constructors
 
@@ -18,18 +17,23 @@ asynchronous and include robust error handling.
 
 > **new URLShortener**(`baseDomain`, `store`): [`URLShortener`](URLShortener.md)
 
-Defined in:
-[components/URLShortener.ts:20](https://github.com/The-Node-Forge/url-shortener/blob/0505465b023da8537f4142a9cb2e5ebfc46c68fd/src/components/URLShortener.ts#L20)
+Defined in: [components/URLShortener.ts:23](https://github.com/The-Node-Forge/url-shortener/blob/325c54b22c00921a6b1c21ee92eb374754795459/src/components/URLShortener.ts#L23)
+
+Create a new URLShortener instance.
 
 #### Parameters
 
 ##### baseDomain
 
-`string` = `'https://sho.rt'`
+`string`
+
+Domain used for returned shortened URLs (e.g., "https://sho.rt")
 
 ##### store
 
-`StoreAdapter` = `...`
+`StoreAdapter`
+
+Redis-backed implementation of the StoreAdapter interface
 
 #### Returns
 
@@ -41,11 +45,11 @@ Defined in:
 
 > **resolve**(`alias`): `Promise`\<`null` \| `string`\>
 
-Defined in:
-[components/URLShortener.ts:81](https://github.com/The-Node-Forge/url-shortener/blob/0505465b023da8537f4142a9cb2e5ebfc46c68fd/src/components/URLShortener.ts#L81)
+Defined in: [components/URLShortener.ts:98](https://github.com/The-Node-Forge/url-shortener/blob/325c54b22c00921a6b1c21ee92eb374754795459/src/components/URLShortener.ts#L98)
 
-Resolves a short alias to its original URL. Returns null if the alias does not exist
-or has expired.
+Resolves a short alias back to its original long URL.
+- If alias doesn’t exist, returns null
+- If alias exists but expired, deletes it and returns null
 
 #### Parameters
 
@@ -53,21 +57,27 @@ or has expired.
 
 `string`
 
+The short code to resolve
+
 #### Returns
 
 `Promise`\<`null` \| `string`\>
 
----
+The original long URL or null if not found/expired
+
+***
 
 ### shorten()
 
 > **shorten**(`longUrl`, `options`?): `Promise`\<`string`\>
 
-Defined in:
-[components/URLShortener.ts:33](https://github.com/The-Node-Forge/url-shortener/blob/0505465b023da8537f4142a9cb2e5ebfc46c68fd/src/components/URLShortener.ts#L33)
+Defined in: [components/URLShortener.ts:39](https://github.com/The-Node-Forge/url-shortener/blob/325c54b22c00921a6b1c21ee92eb374754795459/src/components/URLShortener.ts#L39)
 
-Shortens a long URL into a short one. Validates the URL, ensures alias uniqueness,
-parses TTL, and stores the mapping.
+Shortens a long URL into a shorter one with an alias.
+- Generates alias if not provided
+- Validates the URL
+- Checks for collisions
+- Supports optional expiration time and override flag
 
 #### Parameters
 
@@ -75,12 +85,16 @@ parses TTL, and stores the mapping.
 
 `string`
 
+The full, original URL to shorten
+
 ##### options?
 
 `ShortenOptions`
+
+Optional config (alias, override, expiresIn)
 
 #### Returns
 
 `Promise`\<`string`\>
 
-A Promise that resolves to the shortened URL string.
+A Promise that resolves to the full shortened URL string

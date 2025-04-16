@@ -9,8 +9,8 @@ describe('URLShortener (MockRedisStore)', () => {
   let shortener: URLShortener;
 
   beforeEach(() => {
-    // Use modern fake timers (casting to any to appease TS)
-    jest.useFakeTimers('modern' as any);
+    // Use modern fake timers (casting to never to appease TS)
+    jest.useFakeTimers('modern' as never);
     // Record the starting time (this is controlled by fake timers)
     mockStore = new MockRedisStore();
     shortener = new URLShortener('https://sho.rt', mockStore);

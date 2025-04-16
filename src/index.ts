@@ -1,4 +1,4 @@
-import { URLShortener } from './components/URLShortener.js';
+import { URLShortener } from './components/URLShortener';
+import { RedisStore } from './stores/redisStore';
 
-export { URLShortener };
-export default URLShortener;
+export { URLShortener, RedisStore };

@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable space-before-function-paren */
-import { ShortenOptions, StoreAdapter } from '../types/types';
-import { parseExpiresIn } from '../utils/parseExpiresIn.js';
+import { type ShortenOptions, type StoreAdapter } from '../types/types';
+import { parseExpiresIn } from '../utils/parseExpiresIn';
 
 /**
  * URLShortener provides methods to shorten URLs and resolve aliases.
