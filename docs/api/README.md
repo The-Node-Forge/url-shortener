@@ -1,6 +1,6 @@
 **@the-node-forge/url-shortener**
 
----
+***
 
 <div align="center">
 

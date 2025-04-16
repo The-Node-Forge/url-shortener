@@ -2,4 +2,5 @@
 
 ## Classes
 
+- [RedisStore](classes/RedisStore.md)
 - [URLShortener](classes/URLShortener.md)
