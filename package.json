@@ -1,7 +1,7 @@
 {
   "name": "@the-node-forge/url-shortener",
   "version": "1.0.0",
-  "description": "A URL shortener that converts lengthy URLs into compact, unique links that redirect users to the original destination.",
+  "description": "A URL shortener that generates and stores unique aliases for long URLs, with optional expiration and custom alias support.",
   "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
