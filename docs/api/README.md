@@ -12,7 +12,7 @@
 
 [![NPM Version](https://img.shields.io/npm/v/@the-node-forge/url-shortener)](https://www.npmjs.com/package/@the-node-forge/url-shortener)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/the-node-forge/url-shortener/ci.yaml?branch=main)](https://github.com/The-Node-Forge/url-shortener/actions)
-![Platform](https://img.shields.io/badge/platform-node.js%20%7C%20browser-brightgreen)
+![Platform](https://img.shields.io/badge/platform-node.js-brightgreen)
 
 [Live Documentation](https://the-node-forge.github.io/url-shortener/)
 
