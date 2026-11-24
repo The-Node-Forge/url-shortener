@@ -4,6 +4,7 @@
   "description": "A URL shortener that generates and stores unique aliases for long URLs, with optional expiration and custom alias support.",
   "type": "commonjs",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
