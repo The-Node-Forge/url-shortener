@@ -1,6 +1,6 @@
 {
   "name": "@the-node-forge/url-shortener",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A URL shortener that generates and stores unique aliases for long URLs, with optional expiration and custom alias support.",
   "type": "commonjs",
   "main": "dist/index.js",
